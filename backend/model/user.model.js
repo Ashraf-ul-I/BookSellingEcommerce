@@ -28,6 +28,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    }
 }, {timestamps: true});
 
 export const User = mongoose.model('User', userSchema);
