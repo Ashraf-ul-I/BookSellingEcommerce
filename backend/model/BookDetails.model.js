@@ -20,6 +20,9 @@ const bookDetails=new Schema({
         type:Number,
         required:true
     },
+    photo:{
+        type:String
+    },
     isbnNumber:{
         type:String,
         required:true

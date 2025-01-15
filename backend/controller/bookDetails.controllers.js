@@ -7,6 +7,7 @@ export const bookDetails = async (req, res) => {
     if (!bookTitle || !authorName || !category || !price) {
         throw new Error("All Fields are required");
     }
+    const photoUrl=req.file?req.file.path:null;
 
     try {
        
@@ -16,6 +17,7 @@ export const bookDetails = async (req, res) => {
             category,
             price,
             isbnNumber,
+            photo:photoUrl
         });
 
         await books.save();

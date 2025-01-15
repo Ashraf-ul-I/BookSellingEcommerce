@@ -5,7 +5,7 @@ import bookDetails from '../backend/routes/bookDetails.routes.js'
 import orderRoutes from './routes/order.routes.js'
 import { connectDB } from './db/connectDB.js';
 import dotenv from 'dotenv'
-
+import rateLimit from './utils/rateLimit.js'
 const app=express();
 
 app.use(cookieParser());
@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.use('/api/auth',authRoutes);
 app.use('/api/books',bookDetails);
-app.use('/api/orders',orderRoutes)
+app.use('/api/orders',rateLimit,orderRoutes)
 //converting the uri parameter to string
 dotenv.config();
 const PORT=process.env.PORT || 5000

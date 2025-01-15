@@ -36,7 +36,6 @@ export const createOrder=async (req,res)=>{
     }
 }
 
-
 export const getOrder = async (req, res) => {
     const userId = req.user.userId;
     try {
@@ -81,3 +80,48 @@ export const getOrder = async (req, res) => {
     }
 };
 
+//i want to track the record of user so i just changed the status didnot delete it permananetly
+export const cancelOrder=async(req,res)=>{
+    const {orderId}=req.params;
+    const userId = req.user.userId;
+    try {
+        const order=await OrderBooks.findOne({_id:orderId,user:userId});
+        if(!order){
+            return res.status(404).json({
+                success: false,
+                message: "Order not found or you do not have permission to cancel this order",
+            });
+        }
+        order.status='Cancelled';
+        await order.save();
+        return res.status(204).json({
+            success: true,
+            message: "Order Cancelled Succesfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+export const trackOrder=async (req,res)=>{
+    const {orderId}=req.params;
+    
+    if(!orderId){
+        return res.status(401).json({success:false,message:'userid are not provided'});
+    }
+
+    try {
+        const order=await OrderBooks.findById(orderId);
+        if(!order.user){
+            return res.status(404).
+            json({success:false,message:'order didnot found'});
+        };
+        return res.status(200).json({success:true,message:"orderget Succesfull",status: order.status})
+        
+    } catch (error) {
+        res.status(400).json({ error: 'Failed to track the order.' });
+    }
+}
