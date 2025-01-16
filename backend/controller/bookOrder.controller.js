@@ -1,6 +1,7 @@
 import { OrderBooks } from "../model/orderScehma.model.js";
 import { BookDetails } from "../model/BookDetails.model.js";
-
+import moment from 'moment'
+import {SalesReport} from '../model/salesReport.model.js'
 export const createOrder=async (req,res)=>{
     try {
         
@@ -125,3 +126,59 @@ export const trackOrder=async (req,res)=>{
         res.status(400).json({ error: 'Failed to track the order.' });
     }
 }
+
+export const salesReport = async (req, res) => {
+    try {
+      const currentDate = moment();
+  
+      // Loop for the last 5 weeks
+      for (let i = 0; i < 5; i++) {
+        // Calculate the start and end dates of the week
+        const weekEnd = currentDate.clone().subtract(i, "weeks").endOf("week").toDate();
+        const weekStart = currentDate.clone().subtract(i, "weeks").startOf("week").toDate();
+  
+        // Aggregate data for the specific week
+        const weeklyReport = await OrderBooks.aggregate([
+          { $unwind: "$books" }, // Unwind books array
+          {
+            $lookup: {
+              from: "bookdetails", // Join with the bookDetails collection
+              localField: "books.book",
+              foreignField: "_id",
+              as: "bookDetails",
+            },
+          },
+          { $unwind: "$bookDetails" }, // Flatten bookDetails
+          {
+            $match: {
+              createdAt: { $gte: weekStart, $lte: weekEnd }, // Match orders within the week
+            },
+          },
+          {
+            $group: {
+              _id: "$bookDetails.category", // Group by category
+              totalSales: { $sum: "$totalAmount" }, // Sum totalAmount
+              totalBooksSold: { $sum: "$books.quantity" }, // Sum quantities
+            },
+          },
+        ]);
+  
+        // Save each category report for the week
+        for (const categoryReport of weeklyReport) {
+          await SalesReport.create({
+            category: categoryReport._id,
+            totalSales: categoryReport.totalSales,
+            totalBooksSold: categoryReport.totalBooksSold,
+            weekStart,
+            weekEnd,
+          });
+        }
+      }
+  
+      res.json({ message: "5 Weekly Sales Reports Generated Successfully" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+  
