@@ -4,8 +4,8 @@ import cloudinary from '../utils/cloudinary.js';
 const storage=new CloudinaryStorage({
     cloudinary:cloudinary,
     params:{
-        folder:'bookDetailsFile',
-        allowed_formats:['jpg', 'jpeg', 'png','mp4', 'pdf']
+        folder:'bookDetailsPicture',
+        allowed_formats:['jpg', 'jpeg', 'png']
     }
 })
 
